@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cómputo judicial · Calculadora de plazos procesales</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f4ef;--card:#fff;--tx:#1d2330;--mut:#667085;--ac:#1f3a5f;--ac2:#e8eef7;--bd:#d9d6cc;--ok:#1b7a4b;--wr:#9a5b00}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--card:#1d222b;--tx:#e8eaf0;--mut:#9aa3b2;--ac:#8db4ec;--ac2:#26324a;--bd:#323a48;--ok:#5fd09a;--wr:#e3b062}}
+:root[data-theme="dark"]{--bg:#14171d;--card:#1d222b;--tx:#e8eaf0;--mut:#9aa3b2;--ac:#8db4ec;--ac2:#26324a;--bd:#323a48;--ok:#5fd09a;--wr:#e3b062}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 Georgia,'Times New Roman',serif}
+main{max-width:720px;margin:0 auto;padding:20px 16px 40px}
+header{text-align:center;margin-bottom:16px}
+h1{font-size:1.6rem;margin:0;color:var(--ac)}
+.sub{color:var(--mut);margin:2px 0 0;font:.9rem system-ui,sans-serif}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:12px;font-family:system-ui,sans-serif}
+label{display:block;font-size:.8rem;color:var(--mut);margin:10px 0 3px}
+input,select{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font-size:1rem}
+input[type=checkbox]{width:auto;margin-right:6px}
+.chk{display:flex;align-items:center;margin:8px 0 2px;color:var(--tx);font-size:.92rem}
+.sec{margin:6px 0 4px 22px;padding:8px 10px;background:var(--ac2);border-radius:8px;display:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:520px){.row{grid-template-columns:1fr}}
+.btn{width:100%;padding:12px;border:0;border-radius:8px;background:var(--ac);color:var(--bg);cursor:pointer;font-size:1rem;margin-top:14px;font-weight:600}
+.btn.s{width:auto;padding:7px 12px;margin-top:8px;font-size:.88rem;font-weight:400}
+.res{border-left:4px solid var(--ok);text-align:center}
+.big{font-size:1.7rem;font-weight:600;color:var(--ok);margin:2px 0 10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;text-align:left;font-size:.9rem;margin-top:8px}
+.kv b{color:var(--mut);font-weight:500}
+h3{margin:0 0 6px;font-size:1rem;color:var(--ac)}
+.mut{color:var(--mut);font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+td,th{padding:5px 4px;border-bottom:1px solid var(--bd);text-align:left}
+.wrap{overflow-x:auto}
+.no{color:var(--wr)}.si{color:var(--ok)}
+.tag{display:inline-block;background:var(--ac2);color:var(--ac);border-radius:6px;padding:2px 8px;margin:2px 4px 2px 0;font-size:.82rem;cursor:pointer}
+.note{font:.8rem system-ui,sans-serif;color:var(--mut);margin-top:16px;text-align:center}
+</style>
+</head>
+<body>
+<main>
+<header><h1>⚖️ Cómputo judicial</h1><p class="sub">Calculadora de plazos procesales · República del Perú</p></header>
+<div class="card">
+ <b>¿Qué deseas calcular?</b>
+ <label>Materia</label><select id="mat" onchange="acts()"></select>
+ <label>Actuación procesal</label><select id="act"></select>
+ <label>Fecha de notificación o del acto que inicia el plazo</label><input type="date" id="fn">
+ <details style="margin-top:12px"><summary style="cursor:pointer;color:var(--ac)">⚙ Personalizar cálculo</summary>
+  <p class="mut">Los cambios aplican solo a este cálculo; no modifican la base general.</p>
+  <div class="chk"><input type="checkbox" id="c1" onchange="tg()"><label for="c1" style="margin:0;color:inherit;font-size:inherit">Modificar fecha de inicio</label></div>
+  <div class="sec" id="s1"><label>Primer día a computar</label><input type="date" id="fi"></div>
+  <div class="chk"><input type="checkbox" id="c2" onchange="tg()"><label for="c2" style="margin:0;color:inherit;font-size:inherit">Modificar número de días</label></div>
+  <div class="sec" id="s2"><label>Días</label><input type="number" min="1" id="nd"></div>
+  <div class="chk"><input type="checkbox" id="c3" onchange="tg()"><label for="c3" style="margin:0;color:inherit;font-size:inherit">Cambiar días hábiles / calendario</label></div>
+  <div class="sec" id="s3"><select id="tp"><option value="h">Hábiles</option><option value="c">Calendario</option></select></div>
+  <div class="chk"><input type="checkbox" id="c4" onchange="tg()"><label for="c4" style="margin:0;color:inherit;font-size:inherit">Agregar día inhábil</label></div>
+  <div class="sec" id="s4"><div class="row"><div><label>Fecha</label><input type="date" id="i1"></div><div><label>Motivo</label><input id="i2" placeholder="Ej.: Suspensión de labores"></div></div><button class="btn s" onclick="addX('in')">Agregar</button><div id="li"></div></div>
+  <div class="chk"><input type="checkbox" id="c5" onchange="tg()"><label for="c5" style="margin:0;color:inherit;font-size:inherit">Agregar habilitación</label></div>
+  <div class="sec" id="s5"><div class="row"><div><label>Fecha habilitada</label><input type="date" id="h1"></div><div><label>Motivo</label><input id="h2" placeholder="Ej.: Habilitación de día"></div></div><button class="btn s" onclick="addX('hab')">Agregar</button><div id="lh"></div></div>
+  <div class="chk"><input type="checkbox" id="c6" onchange="tg()"><label for="c6" style="margin:0;color:inherit;font-size:inherit">Agregar observación</label></div>
+  <div class="sec" id="s6"><input id="ob" placeholder="Nota para este cálculo"></div>
+ </details>
+ <button class="btn" onclick="calc()">CALCULAR PLAZO</button>
+</div>
+<div id="out"></div>
+<p class="note" id="est" style="font-weight:600"></p>
+<p class="note">Herramienta de apoyo. Plazos tomados del cuadro «Plazos en el proceso civil peruano» (J. G. Blas Palacios). Verifica el resultado con la norma y los avisos oficiales vigentes.</p>
+</main>
+<script>
+/* ▼▼ PEGA AQUÍ los datos de tu proyecto de Supabase (Project Settings > API). Usa la clave 'anon public', nunca la 'service_role'. */
+var CONFIG={SUPABASE_URL:'https://vfimysewbdbbxtxlwxbv.supabase.co',SUPABASE_ANON_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZmaW15c2V3YmRiYnh0eGx3eGJ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA5NzQwMDUsImV4cCI6MjEwNjU1MDAwNX0.rHaSVk6U5fuT6mHcMGgVqfU43dU4m16pgsDb3bJOifA'};
+/* BASE JURÍDICA (datos de respaldo si no hay conexión) — misma estructura que la hoja de administración (PLAZOS, REGLAS, FERIADOS, DÍAS INHÁBILES, HABILITACIONES) */
+var BASE={
+reglas:{R1:{n:'Día siguiente',e:'mismo',d:'El plazo se computa desde el día siguiente a la notificación.'},
+ R2:{n:'Surte efectos al día hábil siguiente',e:'sig',d:'La notificación surte efectos el día hábil siguiente y el plazo corre desde el día posterior.'}},
+plazos:[], /* se arma abajo desde el cuadro de plazos: id, materia, actuación, días, tipo(h/c), regla, base legal */
+feriados:[
+['2026-01-01','Año Nuevo'],['2026-04-02','Jueves Santo'],['2026-04-03','Viernes Santo'],['2026-05-01','Día del Trabajo'],['2026-06-07','Batalla de Arica'],['2026-06-29','San Pedro y San Pablo'],['2026-07-23','Día de la Fuerza Aérea'],['2026-07-28','Fiestas Patrias'],['2026-07-29','Fiestas Patrias'],['2026-08-06','Batalla de Junín'],['2026-08-30','Santa Rosa de Lima'],['2026-10-08','Combate de Angamos'],['2026-11-01','Todos los Santos'],['2026-12-08','Inmaculada Concepción'],['2026-12-09','Batalla de Ayacucho'],['2026-12-25','Navidad'],
+['2027-01-01','Año Nuevo'],['2027-03-25','Jueves Santo'],['2027-03-26','Viernes Santo'],['2027-05-01','Día del Trabajo'],['2027-06-07','Batalla de Arica'],['2027-06-29','San Pedro y San Pablo'],['2027-07-23','Día de la Fuerza Aérea'],['2027-07-28','Fiestas Patrias'],['2027-07-29','Fiestas Patrias'],['2027-08-06','Batalla de Junín'],['2027-08-30','Santa Rosa de Lima'],['2027-10-08','Combate de Angamos'],['2027-11-01','Todos los Santos'],['2027-12-08','Inmaculada Concepción'],['2027-12-09','Batalla de Ayacucho'],['2027-12-25','Navidad']],
+inhabiles:[], /* [fecha, motivo] días no laborables oficiales adicionales */
+habilitaciones:[] /* [fecha, motivo] */
+};
+/* PLAZOS — fuente: cuadro "Plazos en el proceso civil peruano" (J. G. Blas Palacios). Por actuación: [días, artículo] en conocimiento, abreviado y sumarísimo */
+var A=[
+['Subsanar auto de inadmisibilidad de la demanda',[10,'426'],[10,'426'],[3,'551']],
+['Emplazamiento de la demanda (alternativa 1)',[60,'435 y 479'],[30,'435 y 492'],[15,'435 y 550']],
+['Emplazamiento de la demanda (alternativa 2)',[90,'435 y 479'],[45,'435 y 492'],[25,'435 y 550']],
+['Interponer tachas u oposiciones a las pruebas',[5,'478.1'],[3,'491.1']],
+['Absolver tachas u oposiciones',[5,'478.2'],[3,'491.2']],
+['Interponer excepciones o defensas previas',[10,'478.3'],[5,'491.3']],
+['Absolver traslado de excepciones o defensas previas',[10,'478.4'],[5,'491.4']],
+['Contestar la demanda y reconvenir',[30,'478.5'],[10,'491.5'],[5,'554']],
+['Ofrecer medios probatorios por hechos nuevos en contestación o reconvención',[10,'478.6'],[5,'491.6']],
+['Absolver el traslado de la reconvención',[30,'478.7'],[10,'491.7']],
+['Saneamiento',[10,'478.8'],[10,'491.8'],[10,'554 y 555']],
+['Fijación de puntos controvertidos',[3,'468'],[3,'468']],
+['Realización de la audiencia de pruebas',[50,'478.10'],[20,'491.9']],
+['Audiencia especial y complementaria',[10,'478.11'],[5,'491.10']],
+['Alegatos',[5,'212'],[5,'212']],
+['Sentencia',[50,'478.12'],[25,'491.11'],[10,'555 (plazo excepcional)']],
+['Apelar la sentencia',[10,'478.13'],[5,'491.12'],[3,'556']],
+['Subsanar el recurso de apelación (auto de inadmisibilidad)',[5,'367'],[5,'367'],[5,'367']],
+['Elevar el expediente (apelación)',[20,'373'],[20,'373'],[20,'373']],
+['Traslado para absolver la apelación o adherirse',[10,'373'],[10,'373']],
+['Traslado al apelante para absolver la adhesión',[10,'373'],[10,'373']],
+['Vista de la causa (apelación)',[10,'375'],[10,'375'],[5,'375']],
+['Solicitar informe oral (apelación)',[3,'375'],[3,'375'],[3,'375']],
+['Interposición de casación',[10,'387.3'],[10,'387.3'],[10,'387.3']],
+['Solicitar informe oral (casación)',[3,'391'],[3,'391'],[3,'391']],
+['Sentencia de casación',[50,'395'],[50,'395'],[50,'395']]];
+['Conocimiento','Abreviado','Sumarísimo'].forEach(function(v,j){var n=0;A.forEach(function(a){var x=a[j+1];if(x){n++;BASE.plazos.push(['CIV-'+v.charAt(0)+String(n).padStart(2,'0'),'Civil · Proceso '+v.toLowerCase(),a[0],x[0],'h','R1','CPC art. '+x[1]])}})});
+var DS=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'],X={in:[],hab:[]};
+function $(i){return document.getElementById(i)}
+function pd(s){var a=s.split('-');return new Date(+a[0],a[1]-1,+a[2],12)}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function fmt(d){return DS[d.getDay()]+' '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()}
+function add(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function find(l,k){for(var i=0;i<l.length;i++)if(l[i][0]===k)return l[i][1];return null}
+function estado(d){var k=iso(d),m;
+ if((m=find(BASE.habilitaciones,k)||find(X.hab,k)))return{h:1,c:'Día hábil (habilitado: '+m+')'};
+ if((m=find(BASE.feriados,k)))return{h:0,c:'Feriado: '+m};
+ if((m=find(BASE.inhabiles,k)||find(X.in,k)))return{h:0,c:'Día inhábil: '+m};
+ if(d.getDay()===0)return{h:0,c:'Domingo'};if(d.getDay()===6)return{h:0,c:'Sábado'};
+ return{h:1,c:'Día hábil'}}
+function mats(){var m=[];BASE.plazos.forEach(function(p){if(m.indexOf(p[1])<0)m.push(p[1])});
+ $('mat').innerHTML=m.map(function(x){return'<option>'+esc(x)+'</option>'}).join('');acts()}
+function acts(){$('act').innerHTML=BASE.plazos.filter(function(p){return p[1]===$('mat').value}).map(function(p){return'<option value="'+p[0]+'">'+esc(p[2])+' ('+p[3]+' d)</option>'}).join('')}
+function tg(){for(var i=1;i<=6;i++)$('s'+i).style.display=$('c'+i).checked?'block':'none'}
+function addX(t){var f=t==='in'?'i':'h',d=$(f+'1').value,m=$(f+'2').value||(t==='in'?'Día inhábil':'Habilitación');if(!d)return;X[t].push([d,m]);$(f+'1').value='';$(f+'2').value='';lst()}
+function lst(){$('li').innerHTML=X.in.map(function(x,i){return'<span class="tag" onclick="X.in.splice('+i+',1);lst()">'+x[0]+' · '+esc(x[1])+' ✕</span>'}).join('');
+ $('lh').innerHTML=X.hab.map(function(x,i){return'<span class="tag" onclick="X.hab.splice('+i+',1);lst()">'+x[0]+' · '+esc(x[1])+' ✕</span>'}).join('')}
+function calc(){
+ var p=BASE.plazos.filter(function(x){return x[0]===$('act').value})[0],f=$('fn').value;
+ if(!p||!f){$('out').innerHTML='<div class="card no">Selecciona la actuación y la fecha de notificación.</div>';return}
+ var dias=$('c2').checked&&+$('nd').value>0?+$('nd').value:p[3],tipo=$('c3').checked?$('tp').value:p[4],r=BASE.reglas[p[5]],
+ N=pd(f),ef=N,rows=[[null,N,'Notificación','—']];
+ if(r.e==='sig'){ef=add(N,1);while(!estado(ef).h)ef=add(ef,1);rows.push([null,ef,'Surte efectos','—'])}
+ var cur=$('c1').checked&&$('fi').value?pd($('fi').value):add(ef,1),ini=cur,c=0,last=cur,g=0;
+ while(c<dias&&g++<900){var e=estado(cur);
+  if(tipo==='h'&&!e.h)rows.push([null,cur,e.c,'✕']);else{c++;last=cur;rows.push([c,cur,e.c,'✓'])}
+  cur=add(cur,1)}
+ var ven=last,mov=false;
+ if(!estado(ven).h){mov=true;var v=add(ven,1);while(!estado(v).h){rows.push([null,v,estado(v).c,'✕ prórroga']);v=add(v,1)}rows.push([null,v,'Día hábil siguiente','✓ vence']);ven=v}
+ var ob=$('c6').checked&&$('ob').value?'<b>Observación:</b> '+esc($('ob').value)+'<br>':'';
+ var pers=[];if($('c1').checked)pers.push('fecha de inicio');if($('c2').checked)pers.push('número de días');if($('c3').checked)pers.push('tipo de días');if(X.in.length)pers.push('días inhábiles añadidos');if(X.hab.length)pers.push('habilitaciones añadidas');
+ $('out').innerHTML='<div class="card res"><div class="mut">FECHA DE VENCIMIENTO</div><div class="big">'+fmt(ven)+'</div>'
+ +'<div class="kv"><b>Plazo aplicado</b><span>'+dias+' días '+(tipo==='h'?'hábiles':'calendario')+'</span><b>Inicio</b><span>'+fmt(ini)+'</span><b>Días computados</b><span>'+c+'</span></div></div>'
+ +'<div class="card"><h3>📚 Fundamento del cálculo</h3><div class="mut" style="line-height:1.7"><b>Actuación:</b> '+esc(p[2])+' ('+p[0]+')<br><b>Regla seleccionada:</b> '+esc(r.n)+'<br><b>Inicio del cómputo:</b> '+esc(r.d)+'<br><b>Base legal:</b> '+(p[6]?esc(p[6]):'no consignada')+'<br><b>Días excluidos:</b> '+(tipo==='h'?'sábados, domingos, feriados y días inhábiles':'ninguno, salvo prórroga si vence en día inhábil')+(mov?' · el último día cayó en día inhábil y se prorrogó':'')+'<br>'+ob+(pers.length?'<b>Personalizado:</b> '+pers.join(', '):'')+'</div></div>'
+ +'<div class="card"><details><summary style="cursor:pointer;color:var(--ac)">🔎 Ver cálculo detallado</summary><div class="wrap"><table><tr><th>N.°</th><th>Fecha</th><th>Condición</th><th>¿Computa?</th></tr>'
+ +rows.map(function(x){return'<tr><td>'+(x[0]||'—')+'</td><td>'+fmt(x[1])+'</td><td>'+esc(x[2])+'</td><td class="'+(x[3].charAt(0)==='✓'?'si':x[3].charAt(0)==='✕'?'no':'')+'">'+x[3]+'</td></tr>'}).join('')+'</table></div></details></div>';
+ $('out').scrollIntoView({behavior:'smooth'})}
+$('fn').value=iso(new Date());mats();
+async function cargar(){
+ if(!CONFIG.SUPABASE_URL||!CONFIG.SUPABASE_ANON_KEY)return;
+ try{var H={apikey:CONFIG.SUPABASE_ANON_KEY,Authorization:'Bearer '+CONFIG.SUPABASE_ANON_KEY},
+ g=function(t){return fetch(CONFIG.SUPABASE_URL+'/rest/v1/'+t,{headers:H}).then(function(r){if(!r.ok)throw 0;return r.json()})},
+ r=await Promise.all([g('reglas?select=*'),g('plazos?select=*&activo=eq.true&order=id'),g('dias_no_laborables?select=*'),g('habilitaciones?select=*')]);
+ if(!r[1].length||!r[0].length)throw 0;
+ var R={};r[0].forEach(function(x){R[x.id]={n:x.nombre,e:x.efecto,d:x.descripcion||''}});
+ BASE.reglas=R;
+ BASE.plazos=r[1].map(function(x){return[x.id,x.materia,x.actuacion,x.dias,x.tipo,x.regla_id,x.base_legal||'']});
+ BASE.feriados=r[2].filter(function(x){return x.tipo==='feriado'}).map(function(x){return[x.fecha,x.motivo]});
+ BASE.inhabiles=r[2].filter(function(x){return x.tipo==='inhabil'}).map(function(x){return[x.fecha,x.motivo]});
+ BASE.habilitaciones=r[3].map(function(x){return[x.fecha,x.motivo]});
+ mats();$('est').textContent='Base jurídica actualizada en línea.'}
+ catch(e){$('est').textContent='Sin conexión a la base en línea: se muestran los datos de respaldo.'}}
+cargar();
+
+</script>
+</body>
+</html>
