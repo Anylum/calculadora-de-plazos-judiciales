@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Calculadora de plazos procesales",
+  "short_name": "Plazos",
+  "description": "Calcula el vencimiento de tus plazos procesales en el Perú. Herramienta 100% gratuita.",
+  "lang": "es-PE",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#F6F3EC",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
